@@ -1,6 +1,7 @@
 //Import the OpenAPI Large Language Model (you can import other models here eg. Cohere)
 import { OpenAI } from "langchain/llms";
 import { PromptTemplate } from "langchain/prompts";
+import { LLMChain } from "langchain/chains";
 
 //Load environment variables (populate process.env from .env file)
 import * as dotenv from "dotenv";
@@ -16,10 +17,10 @@ export const run = async () => {
 
     const prompt = new PromptTemplate({ template, inputVariables: ["product"] });
 
+    const chain = new LLMChain({ llm: model, prompt });
+
     //Calls out to the model's (OpenAI's) endpoint passing the prompt. This call returns a string
-    const res = await model.call(
-        await prompt.format({ product: "colorful socks" })
-    );
+    const res = await chain.call({ product: "colorful socks" });
     console.log({ res });
 };
 
