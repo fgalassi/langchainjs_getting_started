@@ -1,7 +1,7 @@
 //Import the OpenAPI Large Language Model (you can import other models here eg. Cohere)
 import { OpenAI } from "langchain/llms";
-import { PromptTemplate } from "langchain/prompts";
-import { LLMChain } from "langchain/chains";
+import { initializeAgentExecutor } from "langchain/agents";
+import { SerpAPI, Calculator } from "langchain/tools";
 
 //Load environment variables (populate process.env from .env file)
 import * as dotenv from "dotenv";
@@ -15,13 +15,19 @@ export const run = async () => {
 
     const template = "What would be a good company name a company that makes {product}?";
 
-    const prompt = new PromptTemplate({ template, inputVariables: ["product"] });
+    const tools = [new SerpAPI(), new Calculator()];
 
-    const chain = new LLMChain({ llm: model, prompt });
+    const executor = await initializeAgentExecutor(tools, model, "zero-shot-react-description");
+    console.log("Loaded agent executor.");
+
+    const input =
+        "Who is Beyonce's husband?" +
+        " What is his current age raised to the 0.23 power?";
+    console.log(`Executing with input "${input}"...`);
 
     //Calls out to the model's (OpenAI's) endpoint passing the prompt. This call returns a string
-    const res = await chain.call({ product: "colorful socks" });
-    console.log({ res });
+    const result = await executor.call({ input });
+    console.log(`Got output ${result.output}`);
 };
 
 run();
